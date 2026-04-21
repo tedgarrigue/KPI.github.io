@@ -12,7 +12,7 @@ import BarChartCard from '@/components/charts/BarChartCard';
 import PieChartCard from '@/components/charts/PieChartCard';
 import { JobOffer, SearchCriteria, KPIData } from '@/lib/types';
 import { analyzeOffers, sortOffersByRelevance } from '@/lib/analysis';
-import { searchJobs } from '@/lib/jobService';
+import { searchJobs, JobProvider } from '@/lib/jobService';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 
 export default function Home() {
@@ -28,13 +28,13 @@ export default function Home() {
   const { history, addToHistory, clearHistory, getFromHistory, isLoaded } =
     useSearchHistory();
 
-  const handleSearch = async (searchCriteria: SearchCriteria) => {
+  const handleSearch = async (searchCriteria: SearchCriteria, provider?: JobProvider) => {
     setCriteria(searchCriteria);
     setIsLoading(true);
     setHasSearched(true);
 
     try {
-      const results = await searchJobs(searchCriteria);
+      const results = await searchJobs(searchCriteria, provider);
       const sortedResults = sortOffersByRelevance(results, searchCriteria);
       setOffers(sortedResults);
       addToHistory(searchCriteria, results.length);

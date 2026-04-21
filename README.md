@@ -140,40 +140,87 @@ Vercel auto-détecte Next.js et configure le build automatiquement.
 - **Source** : données générées de manière déterministe
 - **Cas d'usage** : développement, démo, prototype
 
-### Adzuna API (optionnel)
-- **Configuration** :
-  1. Inscrivez-vous à [Adzuna API](https://adzuna.com/api)
-  2. Copiez votre `app_id` et `app_key`
-  3. Créez `.env.local` :
-     ```
-     NEXT_PUBLIC_JOB_PROVIDER=adzuna
-     NEXT_PUBLIC_ADZUNA_API_KEY=your_key
-     NEXT_PUBLIC_ADZUNA_APP_ID=your_app_id
-     ```
+### Multi-Source Provider ⭐ **(Recommandé)**
+Combine automatiquement les sources :
+1. **Indeed** (via RapidAPI) - 💼 Très large couverture
+2. **Jooble** - 🔍 Bonne couverture européenne
+3. **RemoteOK** - 🌍 Spécialisé remote, gratuit
+4. **Adzuna** - 🎯 Optionnel
 
-### Autres Providers (stub)
-- `jooble` : implémentation en attente
-- `francetravail` : nécessite OAuth2 côté serveur (non implémenté)
+**Configuration** :
+```bash
+# .env.local
+NEXT_PUBLIC_JOB_PROVIDER=multi
+NEXT_PUBLIC_INDEED_API_KEY=your_rapidapi_key
+NEXT_PUBLIC_JOOBLE_API_KEY=your_jooble_key
+# RemoteOK est gratuit, pas de clé requise
+```
+
+### Individual Providers
+
+#### RemoteOK (Gratuit ✅)
+- **API** : publique, sans authentification
+- **Spécialité** : offres 100% remote
+- **Configuration** : aucune clé requise
+- **Utilisation** :
+  ```
+  NEXT_PUBLIC_JOB_PROVIDER=remoteok
+  ```
+
+#### Indeed (via RapidAPI)
+- **API** : https://rapidapi.com/laimoon/api/indeed-api
+- **Pricing** : free tier (100 req/jour), puis payant
+- **Couverture** : mondiale, très large
+- **Configuration** :
+  ```
+  NEXT_PUBLIC_JOB_PROVIDER=indeed
+  NEXT_PUBLIC_INDEED_API_KEY=your_key
+  ```
+
+#### Jooble
+- **API** : https://jooble.org/api
+- **Pricing** : gratuit (250 req/jour)
+- **Couverture** : Europe, USA
+- **Configuration** :
+  ```
+  NEXT_PUBLIC_JOB_PROVIDER=jooble
+  NEXT_PUBLIC_JOOBLE_API_KEY=your_key
+  ```
+
+#### Adzuna
+- **API** : https://adzuna.com/api
+- **Pricing** : gratuit avec clés
+- **Couverture** : mondiale
+- **Configuration** :
+  ```
+  NEXT_PUBLIC_JOB_PROVIDER=adzuna
+  NEXT_PUBLIC_ADZUNA_API_KEY=your_key
+  NEXT_PUBLIC_ADZUNA_APP_ID=your_app_id
+  ```
 
 ## ⚠️ Limites Connues
 
-### Sécurité des clés API
-- En mode GitHub Pages (export statique), les clés `NEXT_PUBLIC_*` sont **exposées côté client**
-- **Solution de production** : déployer sur Vercel et utiliser des routes API anonymisées
+### Sources d'API Libres & Gratuites
+- ✅ **RemoteOK** : gratuit, aucune clé requise, spécialisé remote
+- ✅ **Jooble** : gratuit avec limite (250 req/jour)
+- ✅ **Indeed (RapidAPI)** : free tier 100 req/jour, puis payant
+- ✅ **Adzuna** : gratuit avec clés
+
+### Performance Multi-Source
+- Recherche parallèle sur multiple sources (~2-3 sec)
+- Déduplication automatique des offres dupliquées
+- Limite : 100 résultats combinés max (configurable)
 
 ### Extraction de compétences
 - Utilise un **dictionnaire statique** (pas de machine learning)
 - Suffisant pour démarrer, extensible via `src/lib/skills.ts`
 - Cas d'usage avancé : intégrer un modèle NER (NLP)
 
-### France Travail
-- Nécessite un **flux OAuth2 serveur** pour échanger le code
-- Stub documenté mais non implémenté
-- À mettre en place via une API route Vercel
-
-### Performance
-- Pagination limitée à 50 résultats par requête Adzuna
-- Cache localStorage : 10 dernières recherches maximum
+### Limites API officielles
+- RemoteOK 🟢 : aucune limite publique
+- Jooble 🟡 : 250 requêtes/jour
+- Indeed 🟡 : 100 requêtes/jour (free tier)
+- Adzuna 🟡 : limite selon plan
 
 ## 🛠️ Technologie
 
@@ -182,22 +229,83 @@ Vercel auto-détecte Next.js et configure le build automatiquement.
 - **Charts** : Recharts 2
 - **Déploiement** : GitHub Pages (export statique) ou Vercel
 
-## 📝 Exemples d'utilisation
+## � Exemples de Configuration
 
-### Recherche simple
-1. Entrez "Développeur React" et "Paris"
-2. Cliquez sur "Rechercher"
-3. Consultez le tableau de bord KPI et les offres
+### Démarrer immédiatement (Mock Provider)
+Aucune configuration requise, data de démo automatiquement générée.
+```bash
+npm run dev
+# Accès à http://localhost:3000
+# Mode: Mock Provider (30+ offres simulées)
+```
 
-### Filtrage avancé
-1. Effectuez une recherche
-2. Filtrez par type de contrat (CDI), télétravail (Full), salaire (> 40000€)
-3. Exporte les résultats en CSV
+### Activer les sources légales réelles
 
-### Historique
-- Jusqu'à 10 dernières recherches sauvegardées automatiquement
-- Cliquez sur une recherche précédente pour la relancer
-- Effacez l'historique au besoin
+#### Option 1 : Multi-Source (Recommandé)
+```bash
+# .env.local
+NEXT_PUBLIC_JOB_PROVIDER=multi
+NEXT_PUBLIC_JOOBLE_API_KEY=your_jooble_key
+NEXT_PUBLIC_INDEED_API_KEY=your_rapidapi_key
+```
+Cherche sur : Indeed, Jooble, RemoteOK (gratuit), Adzuna (si clé fournie)
+
+#### Option 2 : RemoteOK Seul (Gratuit)
+```bash
+NEXT_PUBLIC_JOB_PROVIDER=remoteok
+```
+Aucune clé requise, offres 100% remote uniquement.
+
+#### Option 3 : Jooble Seul
+```bash
+NEXT_PUBLIC_JOB_PROVIDER=jooble
+NEXT_PUBLIC_JOOBLE_API_KEY=your_key
+```
+
+### Obtenir les clés API
+
+**Jooble** (Gratuit 250 req/jour)
+1. Allez sur https://jooble.org/api
+2. Inscrivez-vous, récupérez votre clé
+3. Copiez dans `.env.local`
+
+**Indeed** (via RapidAPI)
+1. Allez sur https://rapidapi.com/laimoon/api/indeed-api
+2. Cliquez "Subscribe" (free tier)
+3. Copiez votre clé RapidAPI
+4. Copiez dans `.env.local`
+
+**RemoteOK**
+- Accès gratuit automatique, aucune inscription requise
+
+## 🎯 Utilisation
+
+### Sélecteur de Source dans l'Interface
+L'app inclut un **dropdown pour choisir votre source** :
+- 🔄 **Toutes les sources** (Multi) - combien Indeed, Jooble, RemoteOK
+- 📋 **Mock** - donnée de démo sans clé
+- 💼 **Indeed** - accès direct via RapidAPI
+- 🔍 **Jooble** - spécialisé découverte emplois
+- 🌍 **RemoteOK** - 100% remote, gratuit
+- 🎯 **Adzuna** - accès optionnel
+
+### Workflow Typique
+1. Démarrez avec **Mock** ou **RemoteOK** (gratuit)
+2. Entrez un intitulé : "Développeur Python"
+3. Localisation : "Paris" ou "Télétravail"
+4. Cliquez "Rechercher"
+5. Analysez le tableau de bord KPI
+6. Exportez en CSV si besoin
+
+### Passer à l'API Réelle
+```bash
+# En développement local
+1. Obtenez votre clé Jooble/Indeed
+2. Créez .env.local
+3. NEXT_PUBLIC_JOB_PROVIDER=multi
+4. NEXT_PUBLIC_JOOBLE_API_KEY=...
+5. npm run dev
+```
 
 ## 🤝 Contribution
 
